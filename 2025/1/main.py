@@ -1,42 +1,32 @@
-#!/usr/bin/env python3
-
-import os
-import sys
+from typing import TextIO
 
 
-def load_input():
-    file = os.path.join(os.path.dirname(__file__), 'input.txt')
-    if len(sys.argv) > 1:
-        file = sys.argv[1]
-    with open(file) as fp:
+def load(fp: TextIO):
+    def gen():
         while line := fp.readline():
             n = int(line[1:])
             yield -n if line[0] == 'L' else n
+    return list(gen())
 
 
-def part1():
+def part1(data: list[int]):
     code = 0
     dial = 50
-    for n in load_input():
+    for n in data:
         dial = (dial + n) % 100
         if dial == 0:
             code += 1
-    print(code)
+    return code
 
 
-def part2():
+def part2(data: list[int]):
     code = 0
     dial = 50
-    for n in load_input():
+    for n in data:
         code += abs((dial + n) // 100)
         if dial == 0 and n < 0:
             code -= 1
         dial = (dial + n) % 100
         if dial == 0 and n < 0:
             code += 1
-    print(code)
-
-
-if __name__ == '__main__':
-    part1()
-    part2()
+    return code
