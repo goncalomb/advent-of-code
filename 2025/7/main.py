@@ -14,19 +14,13 @@ def load(fp: TextIO):
 def part1and2(data: tuple[int, int, list[set[int]]]):
     s, l, splitters = data
     splits = 0
-    beams = {s}
-    paths = [0] * l
-    paths[s] = 1
+    beams = [0] * l
+    beams[s] = 1
     for s in splitters:
-        for b in set(beams):
-            if b in s:
+        for b in s:
+            if beams[b]:
                 splits += 1
-                beams.remove(b)
-                if b > 0:
-                    paths[b - 1] += paths[b]
-                    beams.add(b - 1)
-                if b + 1 < l:
-                    paths[b + 1] += paths[b]
-                    beams.add(b + 1)
-                paths[b] = 0
-    return splits, sum(paths)
+                beams[b - 1] += beams[b]
+                beams[b + 1] += beams[b]
+                beams[b] = 0
+    return splits, sum(beams)
