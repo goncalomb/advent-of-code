@@ -18,6 +18,10 @@ def load(fp: TextIO):
     return fp.read()
 
 
+def part1and2(data: str):
+    return len(data), len(data)
+
+
 def part1(data: str):
     return len(data)
 
@@ -37,20 +41,27 @@ def module_load(year=None, day=None):
 
 
 def module_run(m, input_fp):
+    p1a2 = hasattr(m, 'part1and2')
+    if (hasattr(m, 'part1') and hasattr(m, 'part2')) == p1a2:
+        return -1, "invalid function, choose 'part1and2' or 'part1' and 'part2'"
+
     if not input_fp:
         f = os.path.join(os.path.dirname(m.__loader__.path), 'input.txt')
         if os.path.isfile(f):
             input_fp = open(f, 'r')
         else:  # fallback to empty temporary file
             input_fp = tempfile.TemporaryFile(mode='r')
-    t = time.time()
+
     with input_fp:
+        t0 = time.time()
         data = m.load(input_fp)
-    result = (
-        m.part1(data),
-        m.part2(data),
-    )
-    return time.time() - t, result
+        result = m.part1and2(data) if p1a2 else (
+            m.part1(data), m.part2(data),
+        )
+        t1 = time.time()
+        if not isinstance(result, tuple) or len(result) != 2:
+            return -1, "result must be tuple of size 2"
+        return t1 - t0, result
 
 
 def command_new(args):
@@ -83,7 +94,10 @@ def command_run(args):
 
     for y, d, m in module_load(args.year, args.day):
         t, result = module_run(m, input_fp)
-        print(y, d, '%.3fs' % t, result)
+        if t == -1:
+            print(y, d, 'ERROR', result)
+        else:
+            print(y, d, '%.3fs' % t, result)
 
 
 if __name__ == '__main__':
