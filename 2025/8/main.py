@@ -14,10 +14,12 @@ def d2(a, b):
     return dx*dx + dy*dy + dz*dz
 
 
-def calculate_d2s(data: list[tuple[int, int, int]]):
-    for i in range(len(data)):
-        for j in range(i + 1, len(data)):
-            yield i, j, d2(data[i], data[j])
+def sorted_links(data: list[tuple[int, int, int]]):
+    def gen():
+        for i in range(len(data)):
+            for j in range(i + 1, len(data)):
+                yield i, j, d2(data[i], data[j])
+    return sorted(gen(), key=lambda v: v[2])
 
 
 def part1and2(data: list[tuple[int, int, int]]):
@@ -27,15 +29,11 @@ def part1and2(data: list[tuple[int, int, int]]):
     part1_max_links = 10**math.floor(math.log10(data_len))
     part1 = part2 = -1
 
-    # calculate and sort distances
-    d2s = list(calculate_d2s(data))
-    d2s.sort(key=lambda v: v[2])
-
-    # create circuits
+    # create circuits starting with closest links
     links_len = 0
     circuits = [i for i in range(data_len)]
     circuits_len = [1] * data_len
-    for a, b, d2 in d2s:
+    for a, b, d2 in sorted_links(data):
         ca = circuits[a]
         cb = circuits[b]
         if ca != cb:
@@ -54,8 +52,7 @@ def part1and2(data: list[tuple[int, int, int]]):
         links_len += 1
         if links_len == part1_max_links:
             # part1
-            lst = list(circuits_len)
-            lst.sort(reverse=True)
+            lst = sorted(circuits_len, reverse=True)
             part1 = lst[0] * lst[1] * lst[2]
 
     return part1, part2
